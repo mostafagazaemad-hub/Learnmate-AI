@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/services/settings_service.dart';
 import '../../core/services/firestore_service.dart';
@@ -26,6 +27,35 @@ class _CoursesScreenState extends State<CoursesScreen> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  String _normalizeUrl(String url) {
+    final trimmed = url.trim();
+    if (trimmed.isEmpty) return trimmed;
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+      return trimmed;
+    }
+    return 'https://$trimmed';
+  }
+
+  void _openCourseWebsite(String url, String title) {
+    final normalizedUrl = _normalizeUrl(url);
+    if (normalizedUrl.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('الرابط غير صالح للدورة.')), // invalid URL message in Arabic
+      );
+      return;
+    }
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CourseWebViewScreen(
+          url: normalizedUrl,
+          title: title,
+        ),
+      ),
+    );
   }
 
   @override
@@ -337,15 +367,22 @@ class _CoursesScreenState extends State<CoursesScreen> {
                       const Icon(Icons.link, color: AppColors.primary, size: 18),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          course.courseWebsite!,
-                          style: const TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 13,
-                            decoration: TextDecoration.underline,
+                        child: InkWell(
+                          onTap: () {
+                            if (course.courseWebsite != null && course.courseWebsite!.isNotEmpty) {
+                              _openCourseWebsite(course.courseWebsite!, course.title);
+                            }
+                          },
+                          child: Text(
+                            course.courseWebsite!,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 13,
+                              decoration: TextDecoration.underline,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
@@ -356,7 +393,9 @@ class _CoursesScreenState extends State<CoursesScreen> {
                   children: [
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: course.courseWebsite != null && course.courseWebsite!.isNotEmpty
+                            ? () => _openCourseWebsite(course.courseWebsite!, course.title)
+                            : null,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -382,6 +421,54 @@ class _CoursesScreenState extends State<CoursesScreen> {
               ],
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+class CourseWebViewScreen extends StatefulWidget {
+  final String url;
+  final String title;
+
+  const CourseWebViewScreen({required this.url, required this.title, super.key});
+
+  @override
+  State<CourseWebViewScreen> createState() => _CourseWebViewScreenState();
+}
+
+class _CourseWebViewScreenState extends State<CourseWebViewScreen> {
+  late final WebViewController _controller;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          onPageStarted: (_) => setState(() => _isLoading = true),
+          onPageFinished: (_) => setState(() => _isLoading = false),
+          onNavigationRequest: (request) => NavigationDecision.navigate,
+        ),
+      )
+      ..loadRequest(Uri.parse(widget.url));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title, overflow: TextOverflow.ellipsis),
+        backgroundColor: AppColors.primary,
+      ),
+      body: Stack(
+        children: [
+          WebViewWidget(controller: _controller),
+          if (_isLoading)
+            const Center(
+              child: CircularProgressIndicator(),
+            ),
         ],
       ),
     );
