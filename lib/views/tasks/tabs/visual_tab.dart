@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // For kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/settings_service.dart';
 import '../../../core/services/image_generation_service.dart';
-import 'dart:html' as html;
+
+// ─── تبويب الرسوم التوضيحية ───────────────────────────────────────────────────
+// يولد صوراً تعليمية من خدمة الذكاء الاصطناعي ويعرضها مع خيارات تنزيل للمستعرض.
 
 class VisualTab extends StatefulWidget {
   final String topic;
@@ -49,6 +51,7 @@ class _VisualTabState extends State<VisualTab> with AutomaticKeepAliveClientMixi
     }
   }
 
+  // Generates illustration URLs using the image generation service.
   Future<void> _generateImage() async {
     setState(() {
       _isLoading = true;
@@ -75,6 +78,7 @@ class _VisualTabState extends State<VisualTab> with AutomaticKeepAliveClientMixi
     }
   }
 
+  // Downloads the generated image when running on web by creating an anchor element.
   void _downloadImage(String url) {
     if (kIsWeb) {
       final html.AnchorElement anchorElement = html.AnchorElement(href: url);

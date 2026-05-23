@@ -4,6 +4,9 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/services/groq_service.dart';
 import '../../../core/services/settings_service.dart';
 
+// ─── تبويب خطة الدراسة ──────────────────────────────────────────────────────
+// هذا التبويب يطلب من الذكاء الاصطناعي توليد خطة دراسة منظمة، ثم يعرض الأيام والمهام.
+// يحتفظ بحالة التقدم والتثبيت على الشاشة الرئيسية إذا تم تثبيت الخطة.
 class PlanTab extends StatefulWidget {
   final String topic;
   final Function(String)? onGenerated;
@@ -49,6 +52,7 @@ class _PlanTabState extends State<PlanTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  // Parses the JSON response from Groq into structured plan data.
   void _parsePlan(String jsonString) {
     try {
       String cleaned = jsonString.trim();
@@ -73,6 +77,7 @@ class _PlanTabState extends State<PlanTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  // Requests a study plan from GroqService and updates the UI with the returned JSON.
   Future<void> _generatePlan() async {
     setState(() => _isLoading = true);
     try {

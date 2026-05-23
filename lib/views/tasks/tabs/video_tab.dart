@@ -6,6 +6,8 @@ import '../../../core/services/settings_service.dart';
 import '../../../core/services/groq_service.dart';
 import '../../../widgets/custom_video_player.dart';
 
+// ─── تبويب الفيديو ────────────────────────────────────────────────────────────
+// يبحث عن فيديو تعليمي مناسب باستخدام GroqService للترجمة ثم VideoService لجلب رابط.
 class VideoTab extends StatefulWidget {
   final String topic;
   final Function(String)? onGenerated;
@@ -51,6 +53,7 @@ class _VideoTabState extends State<VideoTab> with AutomaticKeepAliveClientMixin 
     super.dispose();
   }
 
+  // Generates a video search query, optionally translates the topic, then fetches a video URL.
   Future<void> _generateAIVideo() async {
     final isArabic = _settings.locale.languageCode == 'ar';
     setState(() => _isLoading = true);

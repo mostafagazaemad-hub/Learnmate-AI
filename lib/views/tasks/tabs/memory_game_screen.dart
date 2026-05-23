@@ -20,8 +20,8 @@ class MemoryCard {
 }
 
 class MemoryGameScreen extends StatefulWidget {
-  final String aiJsonResponse; // الـ JSON القادم من الذكاء الاصطناعي
-  final VoidCallback? onBack;
+  final String aiJsonResponse; // JSON المولّد من خدمة الذكاء الاصطناعي
+  final VoidCallback? onBack; // دالة الرجوع إلى الشاشة السابقة
 
   const MemoryGameScreen({super.key, required this.aiJsonResponse, this.onBack});
 
@@ -32,10 +32,10 @@ class MemoryGameScreen extends StatefulWidget {
 class _MemoryGameScreenState extends State<MemoryGameScreen> {
   List<MemoryCard> cards = [];
   String gameMessage = "جاري تجهيز اللعبة...";
-  
+
   MemoryCard? firstSelected;
   MemoryCard? secondSelected;
-  bool isProcessing = false; // لمنع الطالب من الضغط السريع العشوائي
+  bool isProcessing = false; // يمنع الضغط المتكرر قبل انتهاء المطابقة
   int score = 0;
 
   @override
@@ -44,7 +44,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     _setupGame();
   }
 
-  /// دالة قراءة البيانات وتجهيز البطاقات
+  /// يقرأ استجابة AI ويحوّل الأزواج إلى بطاقات قابلة للعرض.
   void _setupGame() {
     try {
       final data = jsonDecode(widget.aiJsonResponse);
@@ -55,51 +55,49 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
       final List<dynamic> pairs = data['pairs'];
       int idCounter = 0;
 
-      // فصل المصطلحات والتعريفات كبطاقات مستقلة، وإعطاء المتطابقين نفس الـ pairId
+      // إنشاء بطاقة لكل مصطلح وتعريف، مع ربطهما بالـ pairId نفسه.
       for (var pair in pairs) {
         cards.add(MemoryCard(text: pair['term'], pairId: idCounter));
         cards.add(MemoryCard(text: pair['definition'], pairId: idCounter));
         idCounter++;
       }
 
-      // خلط البطاقات عشوائياً حتى لا تكون متجاورة
+      // خلط البطاقات حتى تظهر بشكل عشوائي على الشاشة.
       cards.shuffle();
     } catch (e) {
       debugPrint("خطأ في قراءة الـ JSON: $e");
     }
   }
 
-  /// دالة معالجة ضغطة المستخدم على البطاقة
+  /// يتعامل مع ضغطة المستخدم على بطاقة.
   void _onCardTap(MemoryCard card) {
-    // تجاهل الضغطة إذا كانت البطاقة مكشوفة، أو محتسبة مسبقاً، أو إذا كنا نعالج تطابقاً
     if (card.isFlipped || card.isMatched || isProcessing) return;
 
     setState(() {
       card.isFlipped = true;
 
       if (firstSelected == null) {
-        firstSelected = card; // البطاقة الأولى
+        firstSelected = card;
       } else {
-        secondSelected = card; // البطاقة الثانية
+        secondSelected = card;
         isProcessing = true;
         _checkForMatch();
       }
     });
   }
 
-  /// دالة التحقق من التطابق
+  /// يتحقق مما إذا كانت البطاقتان المتاخرتان متطابقتين.
   void _checkForMatch() {
     if (firstSelected!.pairId == secondSelected!.pairId) {
-      // تطابق صحيح!
       setState(() {
         firstSelected!.isMatched = true;
         secondSelected!.isMatched = true;
         score++;
         _resetSelection();
       });
-      
-      // التحقق من الفوز
-      if (score == 5) { // لأننا طلبنا 5 أزواج
+
+      // إذا أكمل المستخدم كل الأزواج، نعرض إشعار نجاح.
+      if (score == 5) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('مبروك! لقد أكملت التحدي بنجاح! 🏆'),
@@ -108,7 +106,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         );
       }
     } else {
-      // تطابق خاطئ، إخفاء البطاقات بعد ثانية واحدة
+      // إذا كانت البطاقة خاطئة، نعيد إخفائها بعد تأخير بسيط.
       Timer(const Duration(seconds: 1), () {
         if (mounted) {
           setState(() {
@@ -121,6 +119,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
     }
   }
 
+  /// إعادة تهيئة الاختيارات حتى يتمكن المستخدم من محاولة زوج آخر.
   void _resetSelection() {
     firstSelected = null;
     secondSelected = null;
@@ -146,7 +145,7 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           children: [
-            // عرض رسالة التشجيع
+            // عرض رسالة اللعبة في الأعلى.
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
               decoration: BoxDecoration(
@@ -160,11 +159,10 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            // شبكة البطاقات
+            // شبكة البطاقات التي يعرضها المستخدم.
             Expanded(
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  // تحديد عدد الأعمدة ونسبة الأبعاد بناءً على مساحة الشاشة
                   final isLandscape = constraints.maxWidth > constraints.maxHeight;
                   final crossAxisCount = isLandscape ? 5 : 2;
                   final aspectRatio = isLandscape ? 1.4 : 1.1;
@@ -187,14 +185,14 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                             color: card.isFlipped || card.isMatched ? Colors.white : AppColors.primary,
                             borderRadius: BorderRadius.circular(20),
                             border: Border.all(
-                              color: card.isMatched ? Colors.green : AppColors.primary, 
-                              width: 3
+                              color: card.isMatched ? Colors.green : AppColors.primary,
+                              width: 3,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.primary.withOpacity(0.1),
                                 blurRadius: 10,
-                                offset: const Offset(0, 4)
+                                offset: const Offset(0, 4),
                               )
                             ],
                           ),
@@ -205,9 +203,9 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                                   card.text,
                                   textAlign: TextAlign.center,
                                   style: GoogleFonts.inter(
-                                    color: AppColors.textPrimary, 
-                                    fontWeight: FontWeight.bold, 
-                                    fontSize: 13
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
                                   ),
                                 )
                               : const Icon(Icons.psychology_outlined, color: Colors.white, size: 48),
@@ -218,7 +216,8 @@ class _MemoryGameScreenState extends State<MemoryGameScreen> {
                 },
               ),
             ),
-            if (score == 5) 
+            // زر إعادة اللعب بعد إنهاء اللعبة.
+            if (score == 5)
               Padding(
                 padding: const EdgeInsets.only(top: 20),
                 child: ElevatedButton.icon(

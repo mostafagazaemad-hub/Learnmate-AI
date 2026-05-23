@@ -7,6 +7,8 @@ import '../../../core/services/settings_service.dart';
 import 'memory_game_screen.dart';
 import 'quiz_game_screen.dart';
 
+// ─── تبويب الألعاب التعليمية ───────────────────────────────────────────────────
+// يستخدم هذا الجزء الذكاء الاصطناعي لتحويل الموضوع إلى لعبة ذاكرة أو اختبار.
 class GameTab extends StatefulWidget {
   final String topic;
   final Function(String)? onGenerated;
@@ -24,15 +26,26 @@ class GameTab extends StatefulWidget {
 }
 
 class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
+  // خدمة الذكاء الاصطناعي لطلب توليد المحتوى من Groq.
   final GroqService _groq = GroqService();
+
+  // خدمة الإعدادات لقراءة وضع الثيم واللغة الحالية.
   final SettingsService _settings = SettingsService();
+
+  // متغير للسيطرة على عرض مؤشر التحميل أثناء انتظار الـ AI.
   bool _isLoading = false;
+
+  // يحفظ كامل استجابة اللعبة المولدة كـ JSON نصي.
   String? _gameData;
-  String _selectedGameType = 'memory'; // 'memory' or 'quiz'
+
+  // نوع اللعبة المختار حالياً: ذاكرة أو اختبار.
+  String _selectedGameType = 'memory'; // 'memory' أو 'quiz'
 
   @override
   bool get wantKeepAlive => true;
 
+  // ─── تهيئة الحالة ───────────────────────────────────────────────────────────
+  // إذا جاءنا JSON لعبة جاهز من شاشة أخرى، نحفظه ونعرضه دون توليد جديد.
   @override
   void initState() {
     super.initState();
@@ -41,14 +54,19 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  // ─── توليد لعبة جديدة عبر الـ AI ───────────────────────────────────────────────
+  // يطلب من الخدمة إنشاء لعبة جديدة بناءً على الموضوع الحالي.
   Future<void> _generateGame() async {
     setState(() => _isLoading = true);
     try {
-      final result = _selectedGameType == 'memory' 
+      final result = _selectedGameType == 'memory'
           ? await _groq.generateMemoryGame(widget.topic)
           : await _groq.generateQuizGame(widget.topic);
-      
+
       String cleaned = result.trim();
+
+      // في بعض الأحيان يعيد النموذج نصاً إضافياً مثل fences كود.
+      // نبحث عن الكائن JSON الصحيح ونستخرجه فقط.
       if (cleaned.contains('```')) {
         final start = cleaned.indexOf('{');
         final end = cleaned.lastIndexOf('}');
@@ -57,7 +75,7 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
         }
       }
 
-      // Validate JSON
+      // التحقق من أن النص المحرّر هو JSON صالح.
       jsonDecode(cleaned);
 
       setState(() {
@@ -65,6 +83,7 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
         _isLoading = false;
       });
 
+      // إرسال البيانات المولدة للخارج إذا تم توفير callback.
       if (widget.onGenerated != null) {
         widget.onGenerated!(cleaned);
       }
@@ -79,6 +98,8 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  // ─── بناء واجهة التبويب ─────────────────────────────────────────────────────
+  // يختار بين حالة التحميل، شاشة اللعبة، أو شاشة البدء.
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -89,7 +110,7 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
         final isArabic = _settings.locale.languageCode == 'ar';
 
         if (_isLoading) return _buildLoadingState(isDark, isArabic);
-        
+
         if (_gameData != null) {
           return Stack(
             children: [
@@ -121,6 +142,7 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  // ─── اختيار شاشة اللعبة بين ذاكرة أو اختبار ───────────────────────────────
   Widget _buildCurrentGameScreen(VoidCallback onBack) {
     final data = jsonDecode(_gameData!);
     if (data.containsKey('pairs')) {
@@ -131,6 +153,7 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
     return const Center(child: Text('Unknown game format'));
   }
 
+  // ─── شاشة التحميل أثناء انتظار الذكاء الاصطناعي ──────────────────────────────
   Widget _buildLoadingState(bool isDark, bool isArabic) {
     return Center(
       child: Column(
@@ -147,6 +170,7 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  // ─── شاشة اختيار نوع اللعبة قبل التوليد ───────────────────────────────────
   Widget _buildGenerateState(bool isDark, bool isArabic) {
     return Center(
       child: SingleChildScrollView(
@@ -170,15 +194,13 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
             ),
             const SizedBox(height: 12),
             Text(
-              isArabic 
-                ? 'تعلم بطريقة ممتعة وتفاعلية من خلال الألعاب الذكية.' 
+              isArabic
+                ? 'تعلم بطريقة ممتعة وتفاعلية من خلال الألعاب الذكية.'
                 : 'Learn in a fun and interactive way through smart games.',
               textAlign: TextAlign.center,
               style: TextStyle(color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary),
             ),
             const SizedBox(height: 40),
-            
-            // Game Selection Cards
             _buildGameTypeCard(
               title: isArabic ? 'لعبة الذاكرة' : 'Memory Match',
               description: isArabic ? 'طابق المصطلحات بتعريفاتها' : 'Match terms with definitions',
@@ -194,7 +216,6 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
               type: 'quiz',
               isDark: isDark,
             ),
-            
             const SizedBox(height: 40),
             SizedBox(
               width: double.infinity,
@@ -216,6 +237,8 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
     );
   }
 
+  // ─── بطاقة اختيار نوع اللعبة ────────────────────────────────────────────────
+  // تعرض الخيار وتحدد إذا كان مختاراً بصرياً.
   Widget _buildGameTypeCard({
     required String title,
     required String description,
@@ -229,7 +252,7 @@ class _GameTabState extends State<GameTab> with AutomaticKeepAliveClientMixin {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: isSelected 
+          color: isSelected
               ? (isDark ? Colors.orange.withOpacity(0.2) : Colors.orange.withOpacity(0.05))
               : (isDark ? AppColors.darkCard : Colors.white),
           borderRadius: BorderRadius.circular(20),

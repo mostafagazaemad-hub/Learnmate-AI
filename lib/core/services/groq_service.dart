@@ -3,7 +3,9 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../api_constants.dart';
 
-// ─── Message Model ────────────────────────────────────────────────────────────
+// ─── نموذج رسالة الدردشة ────────────────────────────────────────────────────────────
+// يستخدم هذا النموذج لبناء الرسائل التي ترسل إلى خدمة الذكاء الاصطناعي.
+// كل رسالة تحتوي على دورها (system/user/assistant) والمحتوى النصي.
 class ChatMessage {
   final String role;
   final String content;
@@ -13,7 +15,8 @@ class ChatMessage {
   Map<String, dynamic> toJson() => {'role': role, 'content': content};
 }
 
-// ─── Groq Service ─────────────────────────────────────────────────────────────
+// ─── خدمة Groq للذكاء الاصطناعي ────────────────────────────────────────────────────
+// هذه الخدمة تبني الطلبات وترسلها إلى واجهة Groq API للحصول على استجابات الذكاء الاصطناعي.
 class GroqService {
   static const String _baseUrl =
       'https://api.groq.com/openai/v1/chat/completions';
@@ -32,7 +35,8 @@ class GroqService {
     ChatMessage(role: 'system', content: _systemPrompt),
   ];
 
-  // ─── Generic POST ──────────────────────────────────────────────────────────
+  // ─── طلب POST عام إلى Groq API ─────────────────────────────────────────────────────
+  // هذه الوظيفة ترسل الرسائل لبناء رد الذكاء الاصطناعي وتتعامل مع الأخطاء العامة.
   Future<String> _post(List<Map<String, dynamic>> messages,
       {double temperature = 0.7, int maxTokens = 1024}) async {
     try {
@@ -91,7 +95,8 @@ class GroqService {
     }
   }
 
-  // ─── Chat ──────────────────────────────────────────────────────────────────
+  // ─── دردشة تفاعلية مع المستخدم ──────────────────────────────────────────────────
+  // هذه الوظيفة تبني رسالة المستخدم وتضيفها إلى سجل المحادثة، ثم تطلب رد الذكاء الاصطناعي.
   Future<String> sendMessage(String userMessage) async {
     // If the message is short (likely a topic), provide 3 suggestions instead of a full explanation
     final words = userMessage.trim().split(RegExp(r'\s+'));
@@ -118,7 +123,8 @@ class GroqService {
     return reply;
   }
 
-  // ─── Mind Map ──────────────────────────────────────────────────────────────
+  // ─── توليد خريطة ذهنية ──────────────────────────────────────────────────────────
+  // تحول الموضوع إلى صيغة خريطة ذهنية بصيغة JSON لترتيب الأفكار والمفاهيم.
   Future<String> generateMindMap(String topic) async {
     final prompt =
         'Generate a clear, high-level mind map for "$topic" in JSON format only. '
@@ -137,7 +143,8 @@ class GroqService {
     );
   }
 
-  // ─── Summary ───────────────────────────────────────────────────────────────
+  // ─── توليد ملخص تعليمي ──────────────────────────────────────────────────────────
+  // يطلب من الموديل تقديم ملخص واضح عن الموضوع مع أهم النقاط.
   Future<String> generateSummary(String topic) async {
     final prompt =
         'Provide a professional, clear summary of "$topic" with bullet points. '
@@ -149,7 +156,8 @@ class GroqService {
     ]);
   }
 
-  // ─── Quiz ──────────────────────────────────────────────────────────────────
+  // ─── توليد اختبار تفاعلي ───────────────────────────────────────────────────────
+  // يطلب أسئلة بصيغة JSON قابلة للعرض في واجهة لعبة أو اختبار.
   Future<String> generateQuiz(String topic, {int count = 5, List<String> types = const ['multiple choice']}) async {
     final typesStr = types.join(', ');
     final prompt =
@@ -176,7 +184,8 @@ class GroqService {
     );
   }
 
-  // ─── Flashcards ────────────────────────────────────────────────────────────
+  // ─── توليد بطاقات تعليمية ───────────────────────────────────────────────────
+  // ينشئ بطاقات مراجعة قصيرة بشكل JSON بحيث يحتوي كل عنصر على سؤال/معلومة وإجابته.
   Future<String> generateFlashcards(String topic) async {
     final prompt =
         'Generate 8 flashcards for "$topic" in JSON format. '
@@ -193,7 +202,8 @@ class GroqService {
     );
   }
 
-  // ─── Study Plan ───────────────────────────────────────────────────────────
+  // ─── توليد خطة دراسة ───────────────────────────────────────────────────────────
+  // يطلب خطة دراسية منظمة لمدة خمسة أيام مع مهام واضحة لكل يوم.
   Future<String> generateStudyPlan(String topic) async {
     final prompt =
         'Generate a structured 5-day study plan for "$topic" in JSON format. '
@@ -224,7 +234,8 @@ class GroqService {
     );
   }
 
-  // ─── Educational Slides ────────────────────────────────────────────────────
+  // ─── توليد شرائح تعليمية ─────────────────────────────────────────────────────
+  // ينشئ محتوى شرائح تعليمية بصيغة JSON مع تنسيق HTML بسيط لكل شريحة.
   Future<String> generateSlides(String topic, {String? description}) async {
     final prompt =
         'Generate exactly 6 premium educational slides for "$topic" in JSON format only. '
@@ -289,7 +300,8 @@ class GroqService {
     ]);
   }
 
-  // ─── AI Podcast Script ────────────────────────────────────────────────────
+  // ─── توليد سيناريو بودكاست تعليمي ─────────────────────────────────────────────
+  // يطلب نص حوار بين شخصين بحيث يكون ممتعاً وسهل الفهم للموضوع الدراسي.
   Future<String> generatePodcastScript(String topic) async {
     final prompt =
         'Create a fun and engaging AI Podcast script about "$topic". '
@@ -328,7 +340,8 @@ class GroqService {
     }
   }
 
-  // ─── Video Script ──────────────────────────────────────────────────────────
+  // ─── توليد سيناريو فيديو تعليمي ─────────────────────────────────────────────
+  // يطلب محتوى فيديو منظم بمشاهد واضحة ونصّي وصري ونقاط رئيسية.
   Future<String> generateVideoScript(String topic) async {
     final prompt =
         'Create a professional educational video script for "$topic". '
@@ -347,7 +360,8 @@ class GroqService {
     ], temperature: 0.6, maxTokens: 2000);
   }
 
-  // ─── YouTube Video ID Finder ────────────────────────────────────────────────
+  // ─── إيجاد معرف فيديو يوتيوب تعليمي ─────────────────────────────────────────
+  // يطلب من الذكاء الاصطناعي اختيار فيديو تعليمي مناسب وإرجاع كود الفيديو فقط.
   Future<String?> findYouTubeVideoId(String topic) async {
     final prompt = 
       'Task: Find a PROFESSIONAL EDUCATIONAL YouTube video about "$topic". '
@@ -370,7 +384,8 @@ class GroqService {
     return id;
   }
 
-  // ─── Memory Game ───────────────────────────────────────────────────────────
+  // ─── توليد لعبة الذاكرة ─────────────────────────────────────────────────────
+  // ينشئ لعبة مطابقة للمصطلحات والتعريفات بصيغة JSON سهلة المعالجة.
   Future<String> generateMemoryGame(String topic) async {
     final prompt =
         'Design a "Memory Match" game for "$topic". '
@@ -398,7 +413,8 @@ class GroqService {
     );
   }
 
-  // ─── Quiz Game ─────────────────────────────────────────────────────────────
+  // ─── توليد لعبة الاختبار ────────────────────────────────────────────────────
+  // ينشئ لعبة أسئلة متعددة الخيارات بصيغة JSON جاهزة للعرض في واجهة المستخدم.
   Future<String> generateQuizGame(String topic) async {
     final prompt =
         'Create a fun 5-question "Quiz Challenge" for "$topic". '
@@ -423,7 +439,8 @@ class GroqService {
     );
   }
 
-  // ─── Translation (Internal) ───────────────────────────────────────────────
+  // ─── ترجمة داخلية إلى الإنجليزية ───────────────────────────────────────────
+  // تستخدم لتحويل الموضوع إلى كلمات مفتاحية باللغة الإنجليزية للبحث أو المقارنة.
   Future<String> translateToEnglish(String text) async {
     final prompt = 'Translate the following topic to English for a search engine. Output ONLY the translated words, nothing else: "$text"';
     final result = await _post([

@@ -4,7 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../core/theme/app_colors.dart';
 
-// 1. نموذج يمثل كل سؤال
+// 1. نموذج يمثل كل سؤال في لعبة اختبار.
+// هذا النموذج يخزن نص السؤال، الخيارات الممكنة، وفهرس الخيار الصحيح.
 class QuizQuestion {
   final String questionText;
   final List<String> options;
@@ -18,7 +19,9 @@ class QuizQuestion {
 }
 
 class QuizGameScreen extends StatefulWidget {
+  // النص الخام للعبة القادمة من خدمة AI بصيغة JSON.
   final String aiJsonResponse;
+  // دالة الرجوع إلى الشاشة السابقة عند الضغط على زر العودة.
   final VoidCallback? onBack;
 
   const QuizGameScreen({super.key, required this.aiJsonResponse, this.onBack});
@@ -28,12 +31,18 @@ class QuizGameScreen extends StatefulWidget {
 }
 
 class _QuizGameScreenState extends State<QuizGameScreen> {
+  // قائمة الأسئلة المولدة من JSON.
   List<QuizQuestion> questions = [];
+  // رسالة تحفيزية أو إرشادية تُعرض أعلى الشاشة.
   String quizMessage = "جاري تجهيز التحدي...";
   
+  // فهرس السؤال الحالي في القائمة.
   int currentQuestionIndex = 0;
+  // عدد الإجابات الصحيحة التي حصل عليها المستخدم.
   int score = 0;
+  // حالة إذا ما تم اختيار إجابة لهذا السؤال بالفعل.
   bool isAnswered = false; 
+  // تخزين خيار المستخدم المحدد حالياً.
   int? selectedOptionIndex; 
 
   Timer? _timer;
@@ -51,6 +60,8 @@ class _QuizGameScreenState extends State<QuizGameScreen> {
     super.dispose();
   }
 
+  /// يبدأ العداد الزمني لكل سؤال.
+  /// يعيد تهيئة حالة السؤال ويخفض الوقت كل ثانية حتى انتهاء الوقت.
   void _startTimer() {
     _timer?.cancel();
     setState(() {
@@ -70,6 +81,8 @@ class _QuizGameScreenState extends State<QuizGameScreen> {
     });
   }
 
+  /// يتم استدعاء هذه الدالة عندما ينتهي الوقت المخصص للسؤال.
+  /// تعتبر السؤال مجاباً عليه دون اختيار وتنتقل تلقائياً للسؤال التالي.
   void _onTimeOut() {
     _timer?.cancel();
     setState(() {
@@ -81,7 +94,8 @@ class _QuizGameScreenState extends State<QuizGameScreen> {
     _moveToNextQuestion();
   }
 
-  /// دالة تفكيك الـ JSON وتجهيز الأسئلة
+  /// دالة تفكيك الـ JSON وتجهيز الأسئلة.
+  /// تأخذ نص الاستجابة من AI وتحوّله إلى نموذج أسئلة داخل التطبيق.
   void _setupQuiz() {
     try {
       final data = jsonDecode(widget.aiJsonResponse);
@@ -106,7 +120,8 @@ class _QuizGameScreenState extends State<QuizGameScreen> {
     }
   }
 
-  /// دالة معالجة إجابة الطالب
+  /// دالة معالجة إجابة الطالب.
+  /// تمنع الاختيار المزدوج لنفس السؤال وتحسب النقاط إذا كانت الإجابة صحيحة.
   void _checkAnswer(int index) {
     if (isAnswered) return; 
 
@@ -123,6 +138,8 @@ class _QuizGameScreenState extends State<QuizGameScreen> {
     _moveToNextQuestion();
   }
 
+  /// ينتظر ثانيتين ثم ينتقل للسؤال التالي.
+  /// إذا كان هذا هو السؤال الأخير، يعرض نتيجة المستخدم النهائية.
   void _moveToNextQuestion() {
     Future.delayed(const Duration(seconds: 2), () {
       if (!mounted) return;
@@ -137,7 +154,7 @@ class _QuizGameScreenState extends State<QuizGameScreen> {
     });
   }
 
-  /// عرض النتيجة النهائية
+  /// عرض نافذة النتيجة النهائية بعد انتهاء جميع الأسئلة.
   void _showFinalScore() {
     showDialog(
       context: context,
@@ -180,6 +197,7 @@ class _QuizGameScreenState extends State<QuizGameScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // حالة التحميل إذا لم يتم إعداد الأسئلة بعد.
     if (questions.isEmpty) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),
@@ -270,7 +288,7 @@ class _QuizGameScreenState extends State<QuizGameScreen> {
               ),
             ),
             const SizedBox(height: 32),
-            // عرض الخيارات كأزرار
+            // عرض الخيارات كأزرار. كل زر يعكس حالة الإجابة بعد الاختيار.
             ...List.generate(currentQuestion.options.length, (index) {
               // تحديد لون الزر بناءً على حالة الإجابة
               Color buttonColor = Colors.white;

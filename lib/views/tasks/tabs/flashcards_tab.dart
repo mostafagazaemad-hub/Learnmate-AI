@@ -4,6 +4,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/services/groq_service.dart';
 import '../../../core/services/settings_service.dart';
 
+// ─── تبويب البطاقات التعليمية ─────────────────────────────────────────────────
+// يولد بطاقات سؤال/جواب من الذكاء الاصطناعي ويتيح قلب البطاقة للتعلّم السريع.
 class Flashcard {
   final String front;
   final String back;
@@ -45,6 +47,7 @@ class _FlashcardsTabState extends State<FlashcardsTab> with AutomaticKeepAliveCl
     }
   }
 
+  // Requests flashcards from GroqService, sanitizes returned JSON, and initializes UI state.
   Future<void> _generateCards() async {
     setState(() {
       _isLoading = true;

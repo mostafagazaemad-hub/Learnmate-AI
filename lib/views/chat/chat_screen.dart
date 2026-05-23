@@ -3,6 +3,8 @@ import '../../core/theme/app_colors.dart';
 import '../../core/services/groq_service.dart';
 import '../../core/services/settings_service.dart';
 
+// ─── نموذج رسالة الدردشة ─────────────────────────────────────────────────────────
+// يمثل رسالة واحدة سواء من المستخدم أو من مساعد الذكاء الاصطناعي.
 class Message {
   final String text;
   final bool isUser;
@@ -10,6 +12,8 @@ class Message {
   Message({required this.text, required this.isUser});
 }
 
+// ─── شاشة الدردشة الرئيسية ──────────────────────────────────────────────────────
+// تعرض المحادثة أمام المستخدم وتدير إرسال واستقبال الرسائل.
 class ChatScreen extends StatefulWidget {
   final String? initialTopic;
 
@@ -52,6 +56,8 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
     }
   }
 
+  // ─── إرسال رسالة المستخدم إلى الخدمة ──────────────────────────────────────────
+  // تضيف الرسالة إلى واجهة المستخدم ثم تطلب رد الذكاء الاصطناعي من GroqService.
   void _sendMessage() async {
     final text = _messageController.text.trim();
     if (text.isEmpty) return;
@@ -74,6 +80,8 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
     _scrollToBottom();
   }
 
+  // ─── التمرير التلقائي إلى أسفل المحادثة ──────────────────────────────────────
+  // هذا يحافظ على ظهور آخر رسالة في الشاشة بعد الإضافة.
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -128,6 +136,8 @@ class _ChatScreenState extends State<ChatScreen> with AutomaticKeepAliveClientMi
     );
   }
 
+  // ─── بناء فقاعة الرسالة ─────────────────────────────────────────────────────────
+  // تعرض الرسائل بشكل مختلف للمستخدم والمساعد داخل واجهة المحادثة.
   Widget _buildMessageBubble(Message message, bool isDark) {
     return Align(
       alignment: message.isUser ? Alignment.centerRight : Alignment.centerLeft,

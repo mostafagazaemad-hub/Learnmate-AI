@@ -4,6 +4,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/services/groq_service.dart';
 import '../../../core/services/settings_service.dart';
 
+// ─── تبويب الاختبار ───────────────────────────────────────────────────────────
+// يولد اختبارات بالذكاء الاصطناعي، يجمع إجابات المستخدم، ثم يقيّمها ويعرض النتائج.
 class Question {
   final String question;
   final List<String> options;
@@ -80,6 +82,7 @@ class _QuizTabState extends State<QuizTab> with AutomaticKeepAliveClientMixin {
     super.dispose();
   }
 
+  // Parses a saved quiz JSON payload into question objects when restored from initialData.
   void _parseQuizData(String data) {
     try {
       final json = jsonDecode(data);
@@ -97,6 +100,7 @@ class _QuizTabState extends State<QuizTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  // Requests quiz questions from GroqService using selected count and types.
   Future<void> _generateQuiz() async {
     final isArabic = _settings.locale.languageCode == 'ar';
     if (_selectedTypes.isEmpty) {
@@ -184,6 +188,7 @@ class _QuizTabState extends State<QuizTab> with AutomaticKeepAliveClientMixin {
     }
   }
 
+  // Submits completed quiz answers to GroqService for evaluation and enriches questions with feedback.
   Future<void> _finishQuiz() async {
     setState(() {
       _isFinished = true;

@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/services/groq_service.dart';
 import '../../../core/services/settings_service.dart';
 
+// ─── تبويب الملخص ─────────────────────────────────────────────────────────────
+// يجلب ملخص موضوعي موجز من الذكاء الاصطناعي ويعرضه مع خيار إعادة التوليد والنسخ.
 class SummaryTab extends StatefulWidget {
   final String topic;
   final Function(String)? onGenerated;
@@ -33,6 +35,7 @@ class _SummaryTabState extends State<SummaryTab> with AutomaticKeepAliveClientMi
     }
   }
 
+  // Calls the AI service to generate a concise summary for the current topic.
   Future<void> _generateSummary() async {
     setState(() => _isLoading = true);
     try {

@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // Added for kIsWeb
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/services/groq_service.dart';
 import '../../../core/services/settings_service.dart';
 
+// ─── تبويب الشرائح ────────────────────────────────────────────────────────────
+// هذا التبويب يولد شرائح عرض تعليمية من الذكاء الاصطناعي ويعرضها داخل WebView.
 class Slide {
   final String title;
   final String layout;
@@ -48,6 +50,7 @@ class _SlidesTabState extends State<SlidesTab> with AutomaticKeepAliveClientMixi
     }
   }
 
+  // Parses stored JSON slide payload into Slide objects when the tab opens with saved data.
   void _parseInitialData(String data) {
     try {
       final json = jsonDecode(data);
@@ -62,6 +65,7 @@ class _SlidesTabState extends State<SlidesTab> with AutomaticKeepAliveClientMixi
     }
   }
 
+  // Calls GroqService to generate slides, then sanitizes and decodes AI JSON before displaying.
   Future<void> _generateSlides() async {
     setState(() => _isLoading = true);
     try {

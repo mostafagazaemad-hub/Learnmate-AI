@@ -4,6 +4,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/services/groq_service.dart';
 import '../../../core/services/settings_service.dart';
 
+// ─── تبويب الملخص الصوتي ───────────────────────────────────────────────────────
+// هذه الشاشة تستخدم الذكاء الاصطناعي لتوليد نص بودكاست ثم تحويله إلى صوت.
 class AudioSummaryTab extends StatefulWidget {
   final String topic;
   final Function(String)? onGenerated;
@@ -31,7 +33,7 @@ class _AudioSummaryTabState extends State<AudioSummaryTab> with AutomaticKeepAli
   bool _isPlaying = false;
   bool _isPaused = false;
   
-  // Progress tracking for Resume
+  // متابعة حالة القراءة الصوتية ونص الكلام المتبقي بعد التوقف المؤقت.
   int _currentWordStart = 0;
   String _remainingText = "";
 
@@ -48,6 +50,8 @@ class _AudioSummaryTabState extends State<AudioSummaryTab> with AutomaticKeepAli
     }
   }
 
+  // ─── تهيئة محرك قراءة النصوص الصوتية ─────────────────────────────────────────
+  // تضيف معالجات عند اكتمال القراءة وعند تحديث التقدم أو حدوث خطأ.
   void _initTts() {
     _flutterTts.setCompletionHandler(() {
       if (mounted) {
@@ -85,6 +89,8 @@ class _AudioSummaryTabState extends State<AudioSummaryTab> with AutomaticKeepAli
     super.dispose();
   }
 
+  // ─── توليد نص البودكاست عبر الـ AI ─────────────────────────────────────────────
+  // يرسل الموضوع إلى GroqService ويخزن النتيجة للنص والصوت.
   Future<void> _generateScript() async {
     setState(() => _isLoading = true);
     try {
@@ -114,37 +120,44 @@ class _AudioSummaryTabState extends State<AudioSummaryTab> with AutomaticKeepAli
     }
   }
 
+  // ─── تشغيل وإيقاف واستئناف الصوت ──────────────────────────────────────────────
+  // يدير حالة التشغيل الحالية ويعد نص البودكاست للاستماع بطريقة سلسة.
   Future<void> _toggleAudio() async {
     if (_script == null) return;
 
-    if (_isPlaying) {
-      if (_isPaused) {
-        setState(() => _isPaused = false);
-        await _flutterTts.speak(_remainingText); 
-      } else {
-        await _flutterTts.stop(); 
-        setState(() {
-          _isPaused = true;
-        });
-      }
-    } else {
-      setState(() {
-        _isPlaying = true;
-        _isPaused = false;
-        _remainingText = _script!;
-      });
-      
-      // Clean script for a smooth TTS experience
-      String cleanText = _script!
-          .replaceAll(RegExp(r'(Alex:|Sarah:)'), '') // Remove names
-          .replaceAll(RegExp(r'[\*#_>]'), '')        // Remove Markdown symbols
-          .replaceAll(RegExp(r'\[.*?\]'), '')       // Remove text in brackets [like this]
-          .replaceAll(RegExp(r'\(.*?\)'), '')       // Remove text in parentheses (like this)
-          .replaceAll(RegExp(r'\s+'), ' ')          // Normalize whitespace
-          .trim();
-          
-      await _flutterTts.speak(cleanText);
+    if (_isPaused) {
+      // استئناف التشغيل من الموضع المتبقي بعد التوقف المؤقت.
+      setState(() => _isPaused = false);
+      await _flutterTts.speak(_remainingText);
+      return;
     }
+
+    if (_isPlaying) {
+      // إيقاف التشغيل إذا كان المشغل يعمل حالياً.
+      await _flutterTts.stop();
+      setState(() {
+        _isPaused = true;
+      });
+      return;
+    }
+
+    // بدء تشغيل جديد إذا لم يكن هناك تشغيل سابق.
+    setState(() {
+      _isPlaying = true;
+      _isPaused = false;
+      _remainingText = _script!;
+    });
+
+    // Clean script for a smooth TTS experience
+    String cleanText = _script!
+        .replaceAll(RegExp(r'(Alex:|Sarah:)'), '') // Remove names
+        .replaceAll(RegExp(r'[\*#_>]'), '')        // Remove Markdown symbols
+        .replaceAll(RegExp(r'\[.*?\]'), '')       // Remove text in brackets [like this]
+        .replaceAll(RegExp(r'\(.*?\)'), '')       // Remove text in parentheses (like this)
+        .replaceAll(RegExp(r'\s+'), ' ')           // Normalize whitespace
+        .trim();
+
+    await _flutterTts.speak(cleanText);
   }
 
   @override

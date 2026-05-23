@@ -6,6 +6,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/services/groq_service.dart';
 import '../../../core/services/settings_service.dart';
 
+// ─── تبويب الجدول ────────────────────────────────────────────────────────────
+// ينشئ جدول معلومات من الذكاء الاصطناعي ويعرضه مع نسخ سريع إلى الحافظة.
 class TableTab extends StatefulWidget {
   final String topic;
   final Function(String)? onGenerated;
@@ -40,6 +42,7 @@ class _TableTabState extends State<TableTab> with AutomaticKeepAliveClientMixin 
     super.dispose();
   }
 
+  // Requests a data table from the AI service and stores the Markdown table result.
   Future<void> _generateTable() async {
     setState(() => _isLoading = true);
     try {
@@ -66,6 +69,7 @@ class _TableTabState extends State<TableTab> with AutomaticKeepAliveClientMixin 
     }
   }
 
+  // Copies the generated table markdown text to the system clipboard.
   void _copyToClipboard() {
     final isArabic = _settings.locale.languageCode == 'ar';
     if (_tableData != null) {
