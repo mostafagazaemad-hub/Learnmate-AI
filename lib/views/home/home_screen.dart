@@ -24,24 +24,43 @@ class HomeScreen extends StatelessWidget {
           backgroundColor: isDark ? AppColors.darkBackground : AppColors.background,
           appBar: AppBar(
             backgroundColor: isDark ? AppColors.darkCard : Colors.white,
-            elevation: 0,
+            elevation: 1,
+            shadowColor: Colors.black.withOpacity(0.08),
             title: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: AppColors.secondary.withOpacity(0.2),
+                    gradient: const LinearGradient(
+                      colors: AppColors.primaryGradient,
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.school, color: AppColors.primary),
+                  child: const Icon(Icons.school, color: Colors.white, size: 24),
                 ),
                 const SizedBox(width: 12),
-                Text(
-                  'LearnMate AI', 
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold, 
-                    color: isDark ? Colors.white : AppColors.textPrimary
-                  )
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'LearnMate AI', 
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold, 
+                        fontSize: 18,
+                        color: isDark ? Colors.white : AppColors.textPrimary
+                      )
+                    ),
+                    Text(
+                      'Learning Platform',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? AppColors.darkTextSecondary : AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
