@@ -15,6 +15,14 @@ class AppColors {
   static const Color warning = Color(0xFFFFC107);
   static const Color info = Color(0xFF2196F3);
 
+  // Feature Design Update Colors
+  static const Color brandPurple = Color(0xFF6B63B5);
+  static const Color lightPurple = Color(0xFFE8DFF5);
+  static const Color coral = Color(0xFFFF6B6B);
+  static const Color lightCoral = Color(0xFFFFE5E5);
+  static const Color teal = Color(0xFF1FBDA4);
+  static const Color lightTeal = Color(0xFFE0F7F4);
+
   // Dark Theme
   static const Color darkBackground = Color(0xFF121212);
   static const Color darkCard = Color(0xFF1E1E1E);
