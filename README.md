@@ -135,3 +135,4 @@ test/                # اختبارات التطبيق
 **تم آخر تحديث:** 23 مايو 2026
 
 > Made with ❤️ by مصطفى عماد جعرور
+\nDesign update: preparing PR for assignment (auto-change)
