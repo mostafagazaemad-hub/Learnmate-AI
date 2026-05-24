@@ -12,6 +12,8 @@ class AppColors {
   static const Color success = Color(0xFF4CAF50);
   static const Color error = Color(0xFFF44336);
   static const Color divider = Color(0xFFEEEEEE);
+  static const Color warning = Color(0xFFFFC107);
+  static const Color info = Color(0xFF2196F3);
 
   // Dark Theme
   static const Color darkBackground = Color(0xFF121212);
@@ -19,4 +21,9 @@ class AppColors {
   static const Color darkTextPrimary = Color(0xFFE1E1E1);
   static const Color darkTextSecondary = Color(0xFFB0B0B0);
   static const Color darkDivider = Color(0xFF2C2C2C);
+  static const Color darkWarning = Color(0xFFFFB74D);
+  static const Color darkInfo = Color(0xFF64B5F6);
+
+  // Gradient Colors
+  static const List<Color> primaryGradient = [primary, secondary];
 }
