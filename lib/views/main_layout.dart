@@ -40,9 +40,10 @@ class _MainLayoutState extends State<MainLayout> {
             decoration: BoxDecoration(
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 15,
+                  offset: const Offset(0, -8),
+                  spreadRadius: 2,
                 ),
               ],
             ),
@@ -54,10 +55,11 @@ class _MainLayoutState extends State<MainLayout> {
                 });
               },
               type: BottomNavigationBarType.fixed,
+              elevation: 0,
               backgroundColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkCard : AppColors.white,
               selectedItemColor: AppColors.primary,
               unselectedItemColor: Theme.of(context).brightness == Brightness.dark ? AppColors.darkTextSecondary : AppColors.textSecondary,
-              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
+              selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12, letterSpacing: 0.5),
               unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
               items: [
                 BottomNavigationBarItem(
