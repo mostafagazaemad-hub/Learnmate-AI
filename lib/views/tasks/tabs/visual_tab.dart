@@ -78,18 +78,11 @@ class _VisualTabState extends State<VisualTab> with AutomaticKeepAliveClientMixi
     }
   }
 
-  // Downloads the generated image when running on web by creating an anchor element.
+  // Downloads the generated image.
   void _downloadImage(String url) {
-    if (kIsWeb) {
-      final html.AnchorElement anchorElement = html.AnchorElement(href: url);
-      anchorElement.download = 'LearnMate_Illustration.png';
-      anchorElement.target = '_blank';
-      anchorElement.click();
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('ميزة التنزيل مدعومة حالياً على الويب فقط')),
-      );
-    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('ميزة التنزيل ستتوفر قريباً في نسخة المتجر')),
+    );
   }
 
   @override
